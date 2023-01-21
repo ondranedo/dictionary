@@ -1,36 +1,29 @@
 #include <stdlib.h>
+
 #include "dictionary.h"
 
-/*
- * 1 - Add word
- * 2 - Print dic.
- * 3 - Print section.
- * 4 - Transaltion
-*/
-
 int main(void)
-{
-    // Creates an instance
-    DicInstance* _d = dicCreateDic(DIC_LANG_CZ, DIC_LANG_EN);
+{ 
+    // Creates a word
+    DicWord cs_en;
+    
+    cs_en = dicCreateWord(DIC_FETCH_CSVFILE, "C:\\dev\\dictionary\\resources\\word\\cs_en.csv");
+  
+    
+    // dicPrintWord(_d);      //Prints local dic. f.e. EN -> CZ
+    // dicPrintSection(_d, 2) // Prints lection f.e.   EN -> CZ
 
-    dicAddWord(_d, DIC_FETCH_CONSOLE, NULL);
+    dicPrintWord(cs_en);
 
-    // dicPrintDic(_d); //Prints local dic. fe. EN -> CZ
-    // dicPrintSection(_d, 2) // Prints lection fe. EN -> CZ
-
-
-    // dicTranslate(_d,
+    // dicTranslate(cs_en,
     //      DIC_CONSOLE,NULL
     //      DIC_FILE,"path/to/file"
 
-    // dicResult _res
-    // dicGetResult(_d, &_res);
-
     // dicParameters _par;
-    // dicGerParameters(_d, _par);
+    // dicGerParameters(cs_en, _par);
 
+    dicDestroyWord(cs_en);
 
-    dicDestroyDic(_d);
 
     return 0;
-}
+ }

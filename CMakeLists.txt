@@ -9,4 +9,4 @@ add_executable(dict
 src/main.c
 src/dictionary.h
 src/dictionary.c
-)
+ )
