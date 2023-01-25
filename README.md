@@ -3,15 +3,15 @@
 
 <img align="right" src="./docs/ansi.png" alt="ansi C" width="100" />
 
-Simple library which provides few function to create simple dictionaries (in this libray refferd as **word**). You can test your self with some words, and the library will provide you with some results. All library is written in C99  and uses heavy struct based structure.
+Simple library with a few functions for creating simple dictionaries (referred to as "words" in this library).You can test yourself with some words, and the library will provide you with some results. The library is written in plain C99 with no vendor libraries.
 
 ### Some funtionalities
 
-- Creates dictionary and visualize it
-- can test you from lectures and provide you results
-- will test you from the whole dictionary(= word)
-- allows you to add new lessons
-- check for duplicates
+- Creates and visualizes a dictionary
+- can put you to the test using lectures and provide you with results.
+- will put you to the test using the entire dictionary (= word)
+- enables you to create new lessons.
+- Check for duplicates.
 
 ## How to run this code
 The program uses CMake as its build tool, but you can use a much simpler and more pleasing way, and that is to use Visual Studio or CLion directly with their imbedded CMake support. Simply open the folder through VS or CL and configure cache, and then you can build and run.
@@ -20,7 +20,7 @@ The program uses CMake as its build tool, but you can use a much simpler and mor
 <br>
 <img align="left" src="./docs/spse.png" alt="ansi C" width="400" /><br><br><br><br><br>
 
-This is a school task, which may accure on the final maturita exam, and it shall be well known, was given to my class from Mrs. Ing. Bozena Ralbova, who's my teacher for programming, and set deadline of January 31, 2023.
+This is a school task, which may appear on the final maturita exam, that was assigned to my class by Mrs. Ing. Bozena Ralbova, my programming teacher, and has a deadline of January 31, 2023. 
 
 <br>
 
