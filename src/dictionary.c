@@ -62,6 +62,32 @@ void dicPrintWord(DicWord word)
 	}
 }
 
+void dicTranslate(const DicWord word, const char* src, char* dest, unsigned int dest_size)
+{
+	char* buff; // Finds word
+	unsigned int i;
+
+	buff = (char*)malloc(1);
+
+	for (i = 0; i < word->word_count; i++)
+	{
+		buff = realloc(buff,sizeof(char)*(strlen(word->word_entry_array[i].from_word + 1)));
+		strcpy(buff, word->word_entry_array[i].from_word);
+		strlwr(buff);
+		strlwr(src);
+
+		if (!strcmp(buff, src))
+		{
+			if (strlen(word->word_entry_array[i].to_word) > dest_size) break;
+
+			strcpy(dest, word->word_entry_array[i].to_word);
+			return;
+		}
+	}
+
+	memset(dest, NULL, dest_size);
+}
+
 /***************\
 *	STATIC DEFINITIONS
 \***************/
@@ -107,11 +133,11 @@ static DicChosenlanguage getLanguageFromTxtFile(FILE* file)
 }
 
 static void findNOccuOfChar(const char* src,
-					 const unsigned int src_size,
-					 char* des, 
-					 const unsigned int des_size,
-					 const char ch, 
-					 const unsigned int n)
+							const unsigned int src_size,
+							char* des, 
+							const unsigned int des_size,
+							const char ch, 
+							const unsigned int n)
 {
 	unsigned int counter = 0, left_offset = 0, right_offset = 0, output_length = 0, i;
 
@@ -149,7 +175,7 @@ static DicLanguage decodeLangFromString(const char* str)
 
 static size_t getWordEntryCount(const char* path)
 {
-	int count = 0;
+	size_t count = 0;
 	char char_buff = 0;
 	FILE* fr = fopen(path, "r");
 	DIC_CHECK_FILE_V(fr,0);

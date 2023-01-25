@@ -56,8 +56,8 @@ typedef DicWordD* DicWord;
 *	Creates a word in your program
 * 
 *	fetchType - tells the program where we want to fetch some data: 
-*		DIC_FETCH_CONSOLE  - do not specify extraData, set extraData as NULL
-*		DIC_FETCH_TEXTFILE - specify the path in extraData for the .csv file, which contains the dic
+*		DIC_FETCH_CONSOLE -> do not specify extraData, set extraData as NULL
+*		DIC_FETCH_CSVFILE -> specify the path in extraData for the .csv file, which contains the dic
 * 
 */
 DicWord dicCreateWord(const DicFetchType fetchType, const void* extraData);
@@ -73,5 +73,20 @@ void dicDestroyWord(DicWord word);
 *
 */
 void dicPrintWord(DicWord word);
+
+/**
+*	Translates dictionary, can fetch data from file
+*	or console
+*	fetchType - tells the program where we want to fetch some data:
+*		DIC_FETCH_CONSOLE -> do not specify extraData
+*								 extraDataL -> set NULL
+*								 extraDataR -> set NULL
+* 
+*		DIC_FETCH_CSVFILE -> specify extraDataL and extraDataR
+*								 extraDataL -> from file
+*								 extraDataR -> to file
+*/
+
+void dicTranslate(const DicWord word, const char* src, char* dest, unsigned int dest_size);
 
 #endif
