@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "dictionary.h"
 
@@ -62,30 +63,148 @@ void dicPrintWord(DicWord word)
 	}
 }
 
+void dicPrintSection(DicWord word, unsigned int lesson)
+{
+	size_t i = 0;
+
+	printf("printing %d. lesson\n", lesson);
+	for (size_t i = 0; i < word->word_count; i++)
+	{
+		if(word->word_entry_array[i].lesson == lesson)
+
+		printf("\t%s\t%s\n",
+			word->word_entry_array[i].from_word,
+			word->word_entry_array[i].to_word
+		);
+	}
+}
+
 void dicTranslate(const DicWord word, const char* src, char* dest, unsigned int dest_size)
 {
 	char* buff; // Finds word
 	unsigned int i;
 
 	buff = (char*)malloc(1);
+	memset(dest, NULL, dest_size);
 
 	for (i = 0; i < word->word_count; i++)
 	{
-		buff = realloc(buff,sizeof(char)*(strlen(word->word_entry_array[i].from_word + 1)));
+		buff = realloc(buff,sizeof(char)*(strlen(word->word_entry_array[i].from_word)+1));
 		strcpy(buff, word->word_entry_array[i].from_word);
 		strlwr(buff);
 		strlwr(src);
 
 		if (!strcmp(buff, src))
 		{
-			if (strlen(word->word_entry_array[i].to_word) > dest_size) break;
-
-			strcpy(dest, word->word_entry_array[i].to_word);
-			return;
+			if (strlen(word->word_entry_array[i].to_word) < dest_size)
+				strcpy(dest, word->word_entry_array[i].to_word);
+			else break;
 		}
 	}
 
+
+	free(buff);
+}
+
+void dicTranslateBack(const DicWord word, const char* src, char* dest, unsigned int dest_size)
+{
+	char* buff; // Finds word
+	unsigned int i;
+
+	buff = (char*)malloc(1);
 	memset(dest, NULL, dest_size);
+
+	for (i = 0; i < word->word_count; i++)
+	{
+		buff = realloc(buff, sizeof(char) * (strlen(word->word_entry_array[i].to_word) + 1));
+		strcpy(buff, word->word_entry_array[i].to_word);
+		strlwr(buff);
+		strlwr(src);
+
+		if (!strcmp(buff, src))
+		{
+			if (strlen(word->word_entry_array[i].from_word) < dest_size)
+				strcpy(dest, word->word_entry_array[i].from_word);
+			else break;
+		}
+	}
+
+	free(buff);
+}
+
+void dicTestWord(const DicWord word, DicTest* ptest, unsigned int words_to_test)
+{
+	unsigned int i,j;
+	unsigned int chosen_word;
+	unsigned int* indexed_words;
+	unsigned int  indexed_words_size = 0;
+
+	unsigned int* incorrect_index;
+	unsigned int incorrect_index_count = 0;
+
+	char usr_buff[100];
+
+	srand(time(0));
+	memset(ptest, NULL, sizeof(DicTest));
+
+	if (words_to_test > word->word_count)
+	{
+		printf("words to test are higer then the number of words in the dictionary\n");
+		ptest->words_tested = word->word_count;
+	}
+	ptest->words_tested = words_to_test;
+
+	indexed_words = (unsigned int*)malloc(ptest->words_tested*sizeof(unsigned int));
+	memset(indexed_words, NULL, ptest->words_tested);
+
+	incorrect_index = (unsigned int*)malloc(ptest->words_tested*sizeof(unsigned int));
+	memset(incorrect_index, NULL, ptest->words_tested);
+
+	for (i = 0; i < ptest->words_tested; i++)
+	{
+		char match;
+		unsigned int indexed_word;
+
+		// find index of word to test
+		do
+		{
+			match = 1;
+			indexed_word = rand() % (word->word_count);
+			for (j = 0; j < ptest->words_tested; j++)
+			{
+				if (indexed_words[j] == indexed_word)
+					match = 0;
+			}
+
+			if(match)
+				indexed_words[indexed_words_size++] = indexed_word;
+
+		} while (!match);
+
+		printf("[%s]: ", word->word_entry_array[indexed_word].to_word);
+		gets_s(usr_buff, 100);
+	
+		if (!strcmp(usr_buff, word->word_entry_array[indexed_word].from_word))
+			ptest->correct++;
+		else
+		{
+			ptest->uncorrect++;
+			incorrect_index[incorrect_index_count++] = indexed_word;
+		}
+	}
+		
+	ptest->percentage_of_succes = ((float)ptest->correct/ (float)ptest->words_tested ) * 100;
+	printf("Succes rate %.1f%%\n", ptest->percentage_of_succes);
+	
+	if (incorrect_index_count)
+	{
+		for (i = 0; i < incorrect_index_count; i++)
+		{
+			printf("\t%s\t->\t%s\n", word->word_entry_array[i].to_word, word->word_entry_array[i].from_word);
+		}
+	}
+
+	free(indexed_words);
 }
 
 /***************\

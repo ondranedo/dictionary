@@ -44,11 +44,18 @@ typedef struct DicWordEntry {
 } DicWordEntry;
 
 // Dictionary f.e. cs -> en
-typedef struct DicWordData {
+typedef struct DicWordD {
 	unsigned int word_count;
 	DicChosenlanguage lang;
 	DicWordEntry* word_entry_array; // Array of lines
 } DicWordD;
+
+typedef struct DicTest {
+	float percentage_of_succes;
+	unsigned int 
+		words_tested,
+		correct,uncorrect;
+} DicTest;
 
 typedef DicWordD* DicWord;
 
@@ -75,18 +82,39 @@ void dicDestroyWord(DicWord word);
 void dicPrintWord(DicWord word);
 
 /**
-*	Translates dictionary, can fetch data from file
-*	or console
-*	fetchType - tells the program where we want to fetch some data:
-*		DIC_FETCH_CONSOLE -> do not specify extraData
-*								 extraDataL -> set NULL
-*								 extraDataR -> set NULL
+*	Prints the dictionary words for given lesson to the console
+*/
+void dicPrintSection(DicWord word, unsigned int lesson);
+
+/**
+*	Translates given word f.e. cs -> en in cs_en word
 * 
-*		DIC_FETCH_CSVFILE -> specify extraDataL and extraDataR
-*								 extraDataL -> from file
-*								 extraDataR -> to file
+*	src - buffer where is stired the word given
+* 
+*	dest - buffer where we store the result - null string ( Not null ptr.!) if word was not found
+* 
+*	dest_size - destination buffer size
 */
 
 void dicTranslate(const DicWord word, const char* src, char* dest, unsigned int dest_size);
+
+/**
+*	Translates given word, backwards f.e. en -> cs in cs_en word
+*
+*	src - buffer where is stired the word given
+*
+*	dest - buffer where we store the result - null string ( Not null ptr.!) if word was not found
+*
+*	dest_size - destination buffer size
+*/
+
+void dicTranslateBack(const DicWord word, const char* src, char* dest, unsigned int dest_size);
+
+/**
+*	ptest - pointer to the DicTest struct
+* 
+*	words_to_test - number of words, to test
+*/
+void dicTestWord(const DicWord word, DicTest* ptest, unsigned int words_to_test);
 
 #endif
