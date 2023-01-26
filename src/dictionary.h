@@ -117,4 +117,20 @@ void dicTranslateBack(const DicWord word, const char* src, char* dest, unsigned 
 */
 void dicTestWord(const DicWord word, DicTest* ptest, unsigned int words_to_test);
 
+/**
+*	gets  ISO-639-1 lang code from which it translates
+* 
+*	dest - buffers where it loads valid  ISO-639-1 language code
+*
+*/
+
+void dicGetFromLangage(const DicWord word, char* dest, unsigned int dest_size);
+
+/**
+*	gets  ISO-639-1 lang code to which it translates
+*
+*	dest - buffers where it loads valid ISO-639-1 language code
+*
+*/
+void dicGetToLangage(const DicWord word, char* dest, unsigned int dest_size);
 #endif

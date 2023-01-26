@@ -16,6 +16,7 @@ static void findNOccuOfChar(const char* src,
 							const unsigned int n);
 static DicLanguage decodeLangFromString(const char* str);
 static size_t getWordEntryCount(const char* path);
+static void decodeISO639_1toSTR(DicLanguage lang, char* dest, unsigned int dest_size);
 
 DicWord dicCreateWord(const DicFetchType fetchType, const void* extraData)
 {
@@ -207,6 +208,16 @@ void dicTestWord(const DicWord word, DicTest* ptest, unsigned int words_to_test)
 	free(indexed_words);
 }
 
+void dicGetFromLangage(const DicWord word, char* dest, unsigned int dest_size)
+{
+	decodeISO639_1toSTR(word->lang.from, dest, dest_size);
+}
+
+void dicGetToLangage(const DicWord word, char* dest, unsigned int dest_size)
+{
+	decodeISO639_1toSTR(word->lang.to, dest, dest_size);
+}
+
 /***************\
 *	STATIC DEFINITIONS
 \***************/
@@ -310,6 +321,19 @@ static size_t getWordEntryCount(const char* path)
 	fclose(fr);
 
 	return count - 1; // -1 - for lang spec.
+}
+
+void decodeISO639_1toSTR(DicLanguage lang, char* dest, unsigned int dest_size)
+{
+	if (dest_size <= 2) return;
+
+	switch (lang)
+	{
+	case DIC_LANG_CS: strcpy(dest, "cs"); break;
+	case DIC_LANG_EN: strcpy(dest, "en"); break;
+
+	default: strcpy(dest, "");
+	}
 }
 
 static DicWordEntry* getHeapWordEntries(FILE* file, size_t worde_count)
