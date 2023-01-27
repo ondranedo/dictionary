@@ -17,16 +17,21 @@ static void findNOccuOfChar(const char* src,
 static DicLanguage decodeLangFromString(const char* str);
 static size_t getWordEntryCount(const char* path);
 static void decodeISO639_1toSTR(DicLanguage lang, char* dest, unsigned int dest_size);
+static void mapLessons(DicWord word);
 
 DicWord dicCreateWord(const DicFetchType fetchType, const void* extraData)
-{
+{ 
+	DicWord r = NULL;
+
 	switch (fetchType)
 	{
 	case DIC_FETCH_CONSOLE: DIC_LOG_ERR("Console is not yet supported"); break;
-	case DIC_FETCH_CSVFILE: return createWordFromCsv(extraData); break;
+	case DIC_FETCH_CSVFILE: r = createWordFromCsv(extraData); break;
 	}
 
-	return NULL;
+	mapLessons(r);
+
+	return r;
 }
 
 void dicDestroyWord(DicWord word)
@@ -42,6 +47,9 @@ void dicDestroyWord(DicWord word)
 
 	// deletes word entry
 	free(word->word_entry_array);
+
+	// deletes lesson map
+	free(word->lessonMap.lesson_arr);
 
 	// deletes word data it self
 	free(word);
@@ -152,7 +160,7 @@ void dicTestWord(const DicWord word, DicTest* ptest, unsigned int words_to_test)
 	{
 		printf("words to test are higer then the number of words in the dictionary\n");
 		ptest->words_tested = word->word_count;
-	}
+	} else
 	ptest->words_tested = words_to_test;
 
 	indexed_words = (unsigned int*)malloc(ptest->words_tested*sizeof(unsigned int));
@@ -171,7 +179,7 @@ void dicTestWord(const DicWord word, DicTest* ptest, unsigned int words_to_test)
 		{
 			match = 1;
 			indexed_word = rand() % (word->word_count);
-			for (j = 0; j < ptest->words_tested; j++)
+			for (j = 0; j < indexed_words_size; j++)
 			{
 				if (indexed_words[j] == indexed_word)
 					match = 0;
@@ -201,11 +209,110 @@ void dicTestWord(const DicWord word, DicTest* ptest, unsigned int words_to_test)
 	{
 		for (i = 0; i < incorrect_index_count; i++)
 		{
-			printf("\t%s\t->\t%s\n", word->word_entry_array[i].to_word, word->word_entry_array[i].from_word);
+			printf("\t%s\t->\t%s\n", word->word_entry_array[incorrect_index[i]].to_word, word->word_entry_array[incorrect_index[i]].from_word);
 		}
 	}
 
 	free(indexed_words);
+	free(incorrect_index);
+}
+
+void dicTestWordLesson(const DicWord word, DicTest* ptest, unsigned int lesson, unsigned int words_to_test)
+{
+	unsigned int i,j;
+	unsigned int word_count = 0;
+	unsigned int* indexed_words;
+	unsigned int indexed_words_size = 0;
+
+	unsigned int* incorrect_words;
+	unsigned int incorrect_words_size = 0;
+
+	char usr_buff[100];
+
+	// find words
+	for (i = 0; i < word->lessonMap.lesson_count; i++)
+		if (word->lessonMap.lesson_arr[i].lesson == lesson)
+			{ word_count = word->lessonMap.lesson_arr[i].word_count; break; }
+	if (!word_count)
+	{
+		printf("There is no known lesson with index %d\n", lesson);
+		return;
+	}
+
+	// test setup
+	srand(time(0));
+	memset(ptest, NULL, sizeof(DicTest));
+
+	// check word count to test
+	if (words_to_test > word_count)
+	{
+		printf("words to test are higer then the number of words in the dictionary\n");
+		ptest->words_tested = word_count;
+	}
+	else
+		ptest->words_tested = words_to_test;
+
+	// prep data
+	indexed_words = (unsigned int*)malloc(sizeof(unsigned int) * ptest->words_tested);
+	memset(indexed_words, NULL, sizeof(unsigned int) * ptest->words_tested);
+
+	incorrect_words = (unsigned int*)malloc(sizeof(unsigned int) * ptest->words_tested);
+	memset(incorrect_words, NULL, sizeof(unsigned int) * ptest->words_tested);
+
+
+	//find word and test it
+	for (i = 0; i < ptest->words_tested; i++)
+	{
+		char match;
+		unsigned int indexed_word;
+
+		// find index of word to test
+		do
+		{
+			match = 1;
+			indexed_word = rand() % (word->word_count);
+			
+
+			if (word->word_entry_array[indexed_word].lesson != lesson)
+				match = 0;
+			
+			for (j = 0; j < indexed_words_size; j++)
+			{
+				if (indexed_words[j] == indexed_word)
+					match = 0;
+			}
+
+			if (match)
+				indexed_words[indexed_words_size++] = indexed_word;
+
+		} while (!match);
+
+		printf("[%s]: ", word->word_entry_array[indexed_word].to_word);
+		gets_s(usr_buff, 100);
+
+		if (!strcmp(usr_buff, word->word_entry_array[indexed_word].from_word))
+			ptest->correct++;
+		else
+		{
+			ptest->uncorrect++;
+			incorrect_words[incorrect_words_size++] = indexed_word;
+		}
+	}
+
+	ptest->percentage_of_succes = ((float)ptest->correct / (float)ptest->words_tested) * 100;
+	printf("Succes rate %.1f%%\n", ptest->percentage_of_succes);
+
+	if (incorrect_words_size)
+	{
+		for (i = 0; i < incorrect_words_size; i++)
+		{
+			printf("\t%s\t->\t%s\n", word->word_entry_array[incorrect_words[i]].to_word, word->word_entry_array[incorrect_words[i]].from_word);
+		}
+	}
+
+	// destroy data
+	free(indexed_words);
+	free(incorrect_words);
 }
 
 void dicGetFromLangage(const DicWord word, char* dest, unsigned int dest_size)
@@ -228,6 +335,9 @@ static DicWord createWordFromCsv(const char* path)
  	DicWord word = (DicWord)malloc(sizeof(DicWordD));
 
 	word->word_count = getWordEntryCount(path);
+
+	word->lessonMap.lesson_arr = NULL;
+	word->lessonMap.lesson_count = NULL;
 
 	fr = fopen(path, "r");
 	DIC_CHECK_FILE_V(fr, NULL);
@@ -323,7 +433,7 @@ static size_t getWordEntryCount(const char* path)
 	return count - 1; // -1 - for lang spec.
 }
 
-void decodeISO639_1toSTR(DicLanguage lang, char* dest, unsigned int dest_size)
+static void decodeISO639_1toSTR(DicLanguage lang, char* dest, unsigned int dest_size)
 {
 	if (dest_size <= 2) return;
 
@@ -334,6 +444,42 @@ void decodeISO639_1toSTR(DicLanguage lang, char* dest, unsigned int dest_size)
 
 	default: strcpy(dest, "");
 	}
+}
+
+static void mapLessons(DicWord word)
+{
+	unsigned int i, j;
+	DicLessonMap tmp_map = { 0,0 };
+	tmp_map.lesson_arr = (DicLesson*)malloc(sizeof(DicLesson)*word->word_count); // max pos. number of words
+	memset(tmp_map.lesson_arr, NULL, sizeof(DicLesson) * word->word_count);
+
+	//checks for one row
+	for (i = 0; i < word->word_count; i++) {
+		unsigned int is_unique = 1;
+		DicLesson new_lesson;
+
+		new_lesson.lesson = word->word_entry_array[i].lesson;
+		new_lesson.word_count = 0;
+
+		// is unique?
+		for (j = 0; j < word->word_count; j++)
+			if (new_lesson.lesson == tmp_map.lesson_arr[j].lesson) { is_unique = 0; break; }
+		if (!is_unique) continue;
+
+		// count lessons
+		for (j = 0; j < word->word_count; j++) {
+			if (new_lesson.lesson == word->word_entry_array[j].lesson) new_lesson.word_count++;
+		}
+
+		// stores new unique lesson
+		memcpy(&tmp_map.lesson_arr[tmp_map.lesson_count++], &new_lesson, sizeof(DicLesson));
+	}
+
+	word->lessonMap.lesson_count = tmp_map.lesson_count;
+	word->lessonMap.lesson_arr = (DicLesson*)malloc(sizeof(DicLesson) * tmp_map.lesson_count);
+	memcpy(word->lessonMap.lesson_arr, tmp_map.lesson_arr, sizeof(DicLesson) * tmp_map.lesson_count);
+	
+	free(tmp_map.lesson_arr);
 }
 
 static DicWordEntry* getHeapWordEntries(FILE* file, size_t worde_count)

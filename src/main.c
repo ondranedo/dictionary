@@ -36,14 +36,14 @@ void menuTranslator(DicWord word)
 
 void menuTestWholeDic(DicWord word, unsigned int word_count)
 {
-    DicTest t1;
-    dicTestWord(word, &t1, word_count);
+    DicTest t;
+    dicTestWord(word, &t, word_count);
 }
 
 void menuTestLesson(DicWord word, unsigned int lesson, unsigned int word_count)
 {
-    DicTest t1;
-    dicTestWordLesson(word, &t1, lesson, word_count);
+    DicTest t;
+    dicTestWordLesson(word, &t, lesson, word_count);
 }
 
 int main(void)
@@ -55,10 +55,13 @@ int main(void)
 
     // menuTranslator(cs_en);
     // menuTestWholeDic(cs_en, 2);
+    while(1)
+    menuTestLesson(cs_en, 2, 3);
 
 
     //TODO: dicSaveWord(cs_en, "C:\\dev\\dictionary\\resources\\word\\cs_en-mod.csv");
     dicDestroyWord(cs_en);
 
+    system("pause>nu");
     return 0;
  }

@@ -43,11 +43,22 @@ typedef struct DicWordEntry {
     char* to_word;
 } DicWordEntry;
 
+typedef struct DicLesson {
+	unsigned int lesson;
+	unsigned int word_count;
+} DicLesson;
+
+typedef struct DicLessonMap {
+	unsigned int lesson_count;
+	DicLesson* lesson_arr;
+} DicLessonMap;
+
 // Dictionary f.e. cs -> en
 typedef struct DicWordD {
 	unsigned int word_count;
 	DicChosenlanguage lang;
 	DicWordEntry* word_entry_array; // Array of lines
+	DicLessonMap lessonMap;
 } DicWordD;
 
 typedef struct DicTest {
@@ -117,13 +128,20 @@ void dicTranslateBack(const DicWord word, const char* src, char* dest, unsigned 
 */
 void dicTestWord(const DicWord word, DicTest* ptest, unsigned int words_to_test);
 
+
+/**
+*   ptest - pointer to the DicTest struct
+* 
+*	words_to_test - number of words, to test
+*/
+void dicTestWordLesson(const DicWord word, DicTest* ptest, unsigned int lesson, unsigned int words_to_test);
+
 /**
 *	gets  ISO-639-1 lang code from which it translates
 * 
 *	dest - buffers where it loads valid  ISO-639-1 language code
 *
 */
-
 void dicGetFromLangage(const DicWord word, char* dest, unsigned int dest_size);
 
 /**
