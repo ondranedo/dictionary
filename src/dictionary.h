@@ -95,7 +95,12 @@ void dicPrintWord(DicWord word);
 /**
 *	Prints the dictionary words for given lesson to the console
 */
-void dicPrintSection(DicWord word, unsigned int lesson);
+void dicPrintLesson(DicWord word, unsigned int lesson);
+
+/**
+*	Prints lesson overview
+*/
+void dicPrintLessonList(DicWord word);
 
 /**
 *	Translates given word f.e. cs -> en in cs_en word

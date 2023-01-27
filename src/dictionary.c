@@ -60,8 +60,13 @@ void dicDestroyWord(DicWord word)
 void dicPrintWord(DicWord word)
 {
 	size_t i = 0;
+	char from[5], to[5];
 
-	printf("Dic has: %d words\n", word->word_count);
+	dicGetFromLangage(word, from, 5);
+	dicGetToLangage(word, to, 5);
+
+
+	printf("Word [%s_%s] has: %d words\n", from,to, word->word_count);
 	for (size_t i = 0; i < word->word_count; i++)
 	{
 		printf("%d\t%s\t%s\n",
@@ -72,11 +77,15 @@ void dicPrintWord(DicWord word)
 	}
 }
 
-void dicPrintSection(DicWord word, unsigned int lesson)
+void dicPrintLesson(DicWord word, unsigned int lesson)
 {
 	size_t i = 0;
+	char from[5], to[5];
 
-	printf("printing %d. lesson\n", lesson);
+	dicGetFromLangage(word, from, 5);
+	dicGetToLangage(word, to, 5);
+
+	printf("printing %d. lesson in word [%s_%s] \n", lesson, from, to);
 	for (size_t i = 0; i < word->word_count; i++)
 	{
 		if(word->word_entry_array[i].lesson == lesson)
@@ -86,6 +95,26 @@ void dicPrintSection(DicWord word, unsigned int lesson)
 			word->word_entry_array[i].to_word
 		);
 	}
+}
+
+void dicPrintLessonList(DicWord word)
+{
+	unsigned int i;
+	char from[5], to[5];
+
+	dicGetFromLangage(word, from, 5);
+	dicGetToLangage(word, to, 5);
+
+	printf("Lesson overview for word [%s_%s]\n", from, to);
+	printf("\tID\twords\n");
+
+	for (i = 0; i < word->lessonMap.lesson_count; i++)
+	{
+		printf("\t%d\t%d\n", word->lessonMap.lesson_arr[i].lesson,
+						     word->lessonMap.lesson_arr[i].word_count
+						     );
+	}
+
 }
 
 void dicTranslate(const DicWord word, const char* src, char* dest, unsigned int dest_size)

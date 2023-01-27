@@ -53,13 +53,20 @@ int main(void)
     
     cs_en = dicCreateWord(DIC_FETCH_CSVFILE, "C:\\dev\\dictionary\\resources\\word\\cs_en.csv");
 
+    // dicPrintLessonList(cs_en);
+    // dicPrintLesson(cs_en, 1);
+    // dicPrintWord(cs_en);
+    
     // menuTranslator(cs_en);
     // menuTestWholeDic(cs_en, 2);
-    while(1)
-    menuTestLesson(cs_en, 2, 3);
+    // menuTestLesson(cs_en, 2, 3);
 
 
+    //TODO: dicFixDuplicates(cs_en);
+    //TODO: dicAddWords(cs_en, DIC_FETCH_CONSOLE, NULL);
+    //TODO: dicAddWords(cs_en, DIC_FETCH_CSVFILE, "C:\\dev\\dictionary\\resources\\word\\en_cs.csv");
     //TODO: dicSaveWord(cs_en, "C:\\dev\\dictionary\\resources\\word\\cs_en-mod.csv");
+
     dicDestroyWord(cs_en);
 
     system("pause>nu");
