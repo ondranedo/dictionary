@@ -1,0 +1,38 @@
+# Project: dictionary
+# Makefile created by Red Panda C++ 2.10
+
+CPP      = g++.exe
+CC       = gcc.exe
+WINDRES  = windres.exe
+RES      = dictionary_private.res
+OBJ      = dictionary.o main.o $(RES)
+LINKOBJ  = dictionary.o main.o $(RES)
+CLEANOBJ  =  dictionary.o main.o dictionary_private.res dictionary.exe
+LIBS     = 
+INCS     =  
+CXXINCS  =  
+BIN      = dictionary.exe
+CXXFLAGS = $(CXXINCS)  -g3 -pipe -Wall -D__DEBUG__
+CFLAGS   = $(INCS)  -g3 -pipe -Wall -D__DEBUG__
+RM       = del /q /f
+WINDRESFLAGS  = 
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before $(BIN) all-after
+
+clean: clean-custom
+	-$(RM) $(CLEANOBJ) > NUL 2>&1
+
+$(BIN): $(OBJ)
+	$(CC) $(LINKOBJ) -o $(BIN) $(LIBS)
+
+dictionary.o: dictionary.c dictionary.h
+	$(CC) -c dictionary.c -o dictionary.o $(CFLAGS) 
+
+main.o: main.c dictionary.h
+	$(CC) -c main.c -o main.o $(CFLAGS) 
+
+dictionary_private.res: dictionary_private.rc 
+	$(WINDRES) -i dictionary_private.rc --input-format=rc -o dictionary_private.res -O coff $(WINDRESFLAGS) 
+

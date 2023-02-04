@@ -1,6 +1,13 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "dictionary.h"
+
+void flushI()
+{
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+}
 
 void menuTranslator(DicWord word)
 {
@@ -12,13 +19,13 @@ void menuTranslator(DicWord word)
 
     dicGetFromLangage(word, from, 5);
     dicGetToLangage(word, to, 5);
+    flushI();
 
     do {
         if (!lang_dir)
             printf("Zadejte slovo ktere chcete prelozit z [%s - > %s]: ", from, to);
         else
             printf("Zadejte slovo ktere chcete prelozit z [%s - > %s]: ", to, from);
-        fflush(stdin);
         gets_s(usr, 50);
 
         if (usr[0] == '0') break;
@@ -66,6 +73,7 @@ void menuPrintList(DicWord word)
     while (!exit) {
         exit = 1;
         printf("Zadejte cislo lekce kterou chcete vypsat: ");
+        fflush(stdin);
         scanf("%d", &lesson);
         if (!dicCheckIfLessonExists(word, lesson)) {
             printf("Lekce neexistuje!\n");
@@ -90,6 +98,7 @@ void menuTest(DicWord word)
         while (!exit) {
             exit = 1;
             printf("Zadejte cislo lekce kterou chcete testovat: ");
+            fflush(stdin);
             scanf("%d", &lesson);
             if (!dicCheckIfLessonExists(word, lesson)) {
                 printf("Lekce neexistuje!\n");
@@ -121,10 +130,49 @@ void menuTest(DicWord word)
 
 }
 
-void menuEdit(DicWord edit)
+void menuEdit(DicWord word)
 {
-    printf("cls");
-
+    char usr_buff[60], from[30], to[30];
+    int i, lesson;
+    system("cls");
+    dicPrintWord(word);
+    printf("---------------------\n");
+    printf("Zadejte slovo (levy sloupec), ktery checete editovat: ");
+    flushI();
+    gets_s(usr_buff, 60);
+    for(i = 0; i < word->word_count; i++)
+        if (!strcmp(word->word_entry_array[i].from_word, usr_buff))
+        {
+            system("cls");
+            printf("Vybrane slovo: %i %s %s\n", word->word_entry_array[i].lesson, word->word_entry_array[i].from_word, word->word_entry_array[i].to_word);
+            printf("Chcete editovat pouze lekci? (1 - ano, 0 - ne");
+            if (menuLoadInt(0, 1))
+            {
+                printf("Zadejte nove cislo lekce: ");
+                scanf("%d", &lesson);
+                strcpy(from, word->word_entry_array[i].from_word);
+                strcpy(to, word->word_entry_array[i].to_word);
+            }
+            else
+            {
+                printf("Zadejte nove cislo lekce: ");
+                scanf("%d", &lesson);
+                printf("Zadejte slovo z ktereho se preklada (levy sloupec): ");
+                flushI();
+                gets_s(from, 30);
+                if (dicCheckForDuplicate(word, from))
+                {
+                    printf("Slovo %s jiz existuje ve slovniku!\n", from);
+                    return;
+                }
+                printf("Zadejte slovo do ktereho se preklada (pravy sloupec): ");
+                gets_s(to, 30);
+            }
+            
+            dicReplaceWordEntrie(word, usr_buff, lesson, from, to);
+            printf("Editovane slovo: %i %s %s\n", word->word_entry_array[i].lesson, word->word_entry_array[i].from_word, word->word_entry_array[i].to_word);
+            break;
+        }
 }
 
 void menuStart()
@@ -147,7 +195,8 @@ void menuStart()
                 case 1:
                 {
                     printf("Zadejte cestu k CSV souboru: ");
-                    scanf("%s", path);
+                    flushI();
+                    gets_s(path, 100);
                     word = dicCreateWord(DIC_FETCH_CSVFILE, path);
                 }break;
             }
@@ -181,7 +230,7 @@ void menuStart()
             case 4: menuTranslator(word); break;
             case 5: menuTest(word); system("pause"); break;
             case 6: dicAddWord(word, DIC_FETCH_CONSOLE, NULL); eddited = 1; break;
-            case 7: menuEdit(word); eddited = 1; break;
+            case 7: menuEdit(word); eddited = 1; system("pause"); break;
             case 8: dicSaveWord(word, path); eddited = 0; break;
             }
         }

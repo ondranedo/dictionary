@@ -1,0 +1,32 @@
+[
+    {
+        "caretX": 3,
+        "caretY": 544,
+        "filename": "C:/dev/dictionary/pandaPort/dictionary/dictionary.c",
+        "focused": false,
+        "isOpen": true,
+        "leftChar": 1,
+        "order": 1,
+        "topLine": 537
+    },
+    {
+        "caretX": 42,
+        "caretY": 37,
+        "filename": "C:/dev/dictionary/pandaPort/dictionary/main.c",
+        "focused": true,
+        "isOpen": true,
+        "leftChar": 1,
+        "order": 0,
+        "topLine": 32
+    },
+    {
+        "caretX": 39,
+        "caretY": 115,
+        "filename": "C:/dev/dictionary/pandaPort/dictionary/dictionary.h",
+        "focused": false,
+        "isOpen": true,
+        "leftChar": 1,
+        "order": 2,
+        "topLine": 115
+    }
+]
