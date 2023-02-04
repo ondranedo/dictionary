@@ -18,6 +18,9 @@ static DicLanguage decodeLangFromString(const char* str);
 static size_t getWordEntryCount(const char* path);
 static void decodeISO639_1toSTR(DicLanguage lang, char* dest, unsigned int dest_size);
 static void mapLessons(DicWord word);
+static void addWordEntriesFromConsole(DicWord word);
+static int addWordIntoDic(DicWord word, int lesson, const char* from, const char* to);
+static int askForLesson();
 
 DicWord dicCreateWord(const DicFetchType fetchType, const void* extraData)
 { 
@@ -25,7 +28,7 @@ DicWord dicCreateWord(const DicFetchType fetchType, const void* extraData)
 
 	switch (fetchType)
 	{
-	case DIC_FETCH_CONSOLE: DIC_LOG_ERR("Console is not yet supported"); break;
+	case DIC_FETCH_CONSOLE: printf("Console creation is not supported\n"); break;
 	case DIC_FETCH_CSVFILE: r = createWordFromCsv(extraData); break;
 	}
 
@@ -220,6 +223,7 @@ void dicTestWord(const DicWord word, DicTest* ptest, unsigned int words_to_test)
 		} while (!match);
 
 		printf("[%s]: ", word->word_entry_array[indexed_word].to_word);
+		fflush(stdin);
 		gets_s(usr_buff, 100);
 	
 		if (!strcmp(usr_buff, word->word_entry_array[indexed_word].from_word))
@@ -317,6 +321,7 @@ void dicTestWordLesson(const DicWord word, DicTest* ptest, unsigned int lesson, 
 		} while (!match);
 
 		printf("[%s]: ", word->word_entry_array[indexed_word].to_word);
+		fflush(stdin);
 		gets_s(usr_buff, 100);
 
 		if (!strcmp(usr_buff, word->word_entry_array[indexed_word].from_word))
@@ -352,6 +357,54 @@ void dicGetFromLangage(const DicWord word, char* dest, unsigned int dest_size)
 void dicGetToLangage(const DicWord word, char* dest, unsigned int dest_size)
 {
 	decodeISO639_1toSTR(word->lang.to, dest, dest_size);
+}
+
+void dicAddWord(const DicWord word, const DicFetchType type, void* extraData)
+{
+	switch (type)
+	{
+	case DIC_FETCH_CONSOLE: addWordEntriesFromConsole(word); break;
+	case DIC_FETCH_CSVFILE: printf("adding word thourght console is not supported\n"); break;
+	}
+}
+
+int dicCheckForDuplicate(const DicWord word, const char* from)
+{
+	int i;
+	for (i = 0; i < word->word_count; i++)
+		if (!strcmp(word->word_entry_array[i].from_word, from)) return 1;
+	return 0;
+}
+
+void dicSaveWord(const DicWord word, const char* path)
+{
+	char from[5], to[5];
+	FILE* f = fopen(path, "w");
+	DIC_CHECK_FILE(f);
+	int i;
+	dicGetFromLangage(word, from, 5);
+	dicGetToLangage(word, to, 5);
+
+	fprintf(f, "%s;%s;%s\n", "lesson", from, to);
+	for (i = 0; i < word->word_count; i++)
+	{
+		fprintf(f, "%d;%s;%s\n", word->word_entry_array[i].lesson,
+			word->word_entry_array[i].from_word,
+			word->word_entry_array[i].to_word
+		);
+	}
+
+	fclose(f);
+}
+
+int dicCheckIfLessonExists(const DicWord word, int lesson)
+{
+	int i;
+	for (i = 0; i < word->lessonMap.lesson_count; i++)
+		if (word->lessonMap.lesson_arr[i].lesson == lesson) 
+			return 1;
+	
+	return 0;
 }
 
 /***************\
@@ -477,6 +530,12 @@ static void decodeISO639_1toSTR(DicLanguage lang, char* dest, unsigned int dest_
 
 static void mapLessons(DicWord word)
 {
+	if (word->lessonMap.lesson_arr != NULL)
+	{
+		free(word->lessonMap.lesson_arr);
+		memset(word->lessonMap.lesson_arr, 0, sizeof(DicLesson) * word->word_count);
+	}
+
 	unsigned int i, j;
 	DicLessonMap tmp_map = { 0,0 };
 	tmp_map.lesson_arr = (DicLesson*)malloc(sizeof(DicLesson)*word->word_count); // max pos. number of words
@@ -505,10 +564,82 @@ static void mapLessons(DicWord word)
 	}
 
 	word->lessonMap.lesson_count = tmp_map.lesson_count;
+	
 	word->lessonMap.lesson_arr = (DicLesson*)malloc(sizeof(DicLesson) * tmp_map.lesson_count);
+	
 	memcpy(word->lessonMap.lesson_arr, tmp_map.lesson_arr, sizeof(DicLesson) * tmp_map.lesson_count);
 	
 	free(tmp_map.lesson_arr);
+}
+
+void addWordEntriesFromConsole(DicWord word)
+{
+	char from[5], to[5];
+	char from_buffer[60];
+	char to_buffer[60];
+	int lesson;
+	int exit_function, exit_worde;
+
+	dicGetFromLangage(word, from, 5);
+	dicGetToLangage(word, to, 5);
+	do{
+		lesson = askForLesson();
+		system("cls");
+	
+		printf("Entering words into lesson number %d\n", lesson);
+		printf("\t> Enter '0' to stop word entry\n");
+		printf("\t> Enter '1' to change lesson\n");
+		exit_function = 0;
+		exit_worde = 0;
+
+		do {
+			do { printf("\tEnter %s word: ", from); } while (scanf("%s", from_buffer) != 1);
+			if (from_buffer[0] == '0') { exit_worde = 1; exit_function = 1; continue; }
+			if (from_buffer[0] == '1') { exit_worde = 1; continue; }
+	
+			do { printf("\tEnter %s word: ", to); } while (scanf("%s", to_buffer) != 1);
+			if (from_buffer[0] == '0') { exit_worde = 1; exit_function = 1; continue; }
+			if (from_buffer[0] == '1') { exit_worde = 1; continue; }
+	
+			if (addWordIntoDic(word, lesson, from_buffer, to_buffer)) printf("Word %s is already in the dictionary!\n", from_buffer);
+			else printf("Word %s_%s added into %s_%s dictionary\n", from_buffer, to_buffer, from, to);
+		} while (!exit_worde);
+
+	}while (!exit_function);
+}
+
+int addWordIntoDic(DicWord word, int lesson, const char* from, const char* to)
+{
+	if (dicCheckForDuplicate(word, from)) return 1;
+
+	word->word_count++;
+	
+	DicWordEntry* e = (DicWordEntry*)malloc(sizeof(DicWordEntry) * word->word_count);
+	memcpy(e, word->word_entry_array, sizeof(DicWordEntry) * (word->word_count - 1));
+	free(word->word_entry_array);
+	word->word_entry_array = e;
+
+	word->word_entry_array[word->word_count-1].lesson = lesson;
+
+	word->word_entry_array[word->word_count-1].from_word = (char*)malloc(strlen(from)+1);
+	memcpy(word->word_entry_array[word->word_count-1].from_word, from, strlen(from)+1);
+	
+	word->word_entry_array[word->word_count-1].to_word = (char*)malloc(strlen(to)+1);
+	memcpy(word->word_entry_array[word->word_count-1].to_word, to, strlen(to)+1);
+
+	mapLessons(word);
+
+	return 0;
+}
+
+int askForLesson()
+{
+	int lesson;
+	do {
+		printf("Enter lesson number: ");
+		fflush(stdin);
+	} while (scanf("%d", &lesson) != 1 || lesson <= 0);
+	return lesson;
 }
 
 static DicWordEntry* getHeapWordEntries(FILE* file, size_t worde_count)

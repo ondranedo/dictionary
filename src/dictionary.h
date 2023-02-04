@@ -156,4 +156,26 @@ void dicGetFromLangage(const DicWord word, char* dest, unsigned int dest_size);
 *
 */
 void dicGetToLangage(const DicWord word, char* dest, unsigned int dest_size);
+
+/**
+*	Starts adding words into the dictionary
+*/
+void dicAddWord(const DicWord word,const DicFetchType type, void* extraData);
+
+/**
+*	Check for duplicatation in the word, returns 1 if there are any
+*									     returns 0 if none
+*/
+int dicCheckForDuplicate(const DicWord word, const char* from);
+
+/**
+*	Save the dictionary as CSV file
+*/
+void dicSaveWord(const DicWord word, const char* path);
+
+/**
+*	Checks if lesson is in the word 0 - is not; 1 - is
+*/
+int dicCheckIfLessonExists(const DicWord word, int lesson);
+
 #endif
