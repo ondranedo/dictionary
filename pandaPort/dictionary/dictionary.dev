@@ -45,11 +45,11 @@ UseUTF8 = 1
 
 
 [Unit1]
-FileName = dictionary.c
+FileName = dictionary.h
 CompileCpp = 0
-Folder = Sources
-Compile = 1
-Link = 1
+Folder = Headers
+Compile = 0
+Link = 0
 Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
@@ -78,7 +78,7 @@ SyncProduct = 1
 
 
 [Unit2]
-FileName = main.c
+FileName = dictionary.c
 CompileCpp = 0
 Folder = Sources
 Compile = 1
@@ -91,16 +91,16 @@ RealEncoding = ASCII
 
 
 [Unit3]
-FileName = dictionary.h
+FileName = main.c
 CompileCpp = 0
-Folder = Headers
-Compile = 0
-Link = 0
+Folder = Sources
+Compile = 1
+Link = 1
 Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
-RealEncoding = ASCII
+RealEncoding = UTF-8
 
 
 [CompilerSettings]

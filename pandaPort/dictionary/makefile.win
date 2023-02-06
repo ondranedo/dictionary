@@ -31,7 +31,7 @@ dictionary.o: dictionary.c dictionary.h
 	$(CC) -c dictionary.c -o dictionary.o $(CFLAGS) 
 
 main.o: main.c dictionary.h
-	$(CC) -c main.c -o main.o $(CFLAGS) 
+	$(CC) -c main.c -o main.o $(CFLAGS)  -finput-charset=UTF-8 -fexec-charset=windows-1252
 
 dictionary_private.res: dictionary_private.rc 
 	$(WINDRES) -i dictionary_private.rc --input-format=rc -o dictionary_private.res -O coff $(WINDRESFLAGS) 
